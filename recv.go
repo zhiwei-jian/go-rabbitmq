@@ -2,12 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/zhiwei-jian/common-go-rabbitmq"
 	"time"
+
+	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
 )
 
+/*
+Implement interface Receiver
+*/
 type RecvPro struct{}
 
+/*
+Method of interface Receiver
+*/
 func (t *RecvPro) Consumer(dataByte []byte) error {
 	fmt.Println(string(dataByte))
 	time.Sleep(1 * time.Second)
