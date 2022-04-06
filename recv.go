@@ -5,6 +5,7 @@ import (
 	"time"
 
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
+	user "github.com/zhiwei-jian/go-rabbitmq/user"
 )
 
 /*
@@ -18,6 +19,8 @@ Method of interface Receiver
 func (t *RecvPro) Consumer(dataByte []byte) error {
 	fmt.Println(string(dataByte))
 	time.Sleep(1 * time.Second)
+	var user = new(user.Userinfo)
+	user.Age = 123
 	return nil
 }
 
