@@ -2,9 +2,11 @@ package user
 
 import (
 	"fmt"
-	"github.com/zhiwei-jian/common-go-postgres"
 	"log"
 	_ "time"
+
+	_ "github.com/lib/pq"
+	compostgres "github.com/zhiwei-jian/common-go-postgres"
 )
 
 type Userinfo struct {
