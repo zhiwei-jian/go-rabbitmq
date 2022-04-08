@@ -11,7 +11,7 @@ import (
 
 type Userinfo struct {
 	Uid      int
-	Username string
+	Name     string
 	NickName string
 	Age      int8
 	Hobby    string `sql:"type:timestamp"`
@@ -22,7 +22,7 @@ func Create(c *compostgres.AppContext, user *Userinfo) {
 	// get insert id
 	lastInsertId := 0
 	// now_str := time.Now().Format("2006-01-02 15:04:05")
-	err := c.Db.QueryRow("INSERT INTO userinfo(name,nickname,age,hobby) VALUES($1,$2,$3,$4) RETURNING uid", user.Username, user.NickName, user.Age, user.Hobby).Scan(&lastInsertId)
+	err := c.Db.QueryRow("INSERT INTO users(name,nickname,age,hobby) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.NickName, user.Age, user.Hobby).Scan(&lastInsertId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,11 +41,11 @@ func Read(c *compostgres.AppContext) {
 
 	for rows.Next() {
 		p := new(Userinfo)
-		err := rows.Scan(&p.Uid, &p.Username, &p.NickName, &p.Age, &p.Hobby)
+		err := rows.Scan(&p.Uid, &p.Name, &p.NickName, &p.Age, &p.Hobby)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(p.Uid, p.Username, p.NickName, p.Age, p.Hobby)
+		fmt.Println(p.Uid, p.Name, p.NickName, p.Age, p.Hobby)
 	}
 }
 

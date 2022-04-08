@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"strings"
-
 	compostgres "github.com/zhiwei-jian/common-go-postgres"
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
 	user "github.com/zhiwei-jian/go-rabbitmq/user"
+	"strings"
 )
 
 /*
@@ -22,9 +22,9 @@ func (t *RecvPro) Consumer(dataByte []byte) error {
 	fmt.Println(string(dataByte))
 	content := Base64Decode(string(dataByte))
 	fmt.Println(content)
-	var newUser = new(user.Userinfo)
-	newUser.Age = 123
-	user.Create(dbContext, newUser)
+
+	newUser := UnmarshalJsonStr([]byte(content))
+	user.Create(dbContext, &newUser)
 	return nil
 }
 
@@ -65,6 +65,8 @@ func main() {
 }
 
 func Base64Decode(str string) string {
+	var strs []string = strings.Split(str, "\"")
+	str = strs[1]
 	reader := strings.NewReader(str)
 	decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
 
@@ -79,4 +81,14 @@ func Base64Decode(str string) string {
 		}
 	}
 	return dst
+}
+
+func UnmarshalJsonStr(jsonBytes []byte) user.Userinfo {
+	var user user.Userinfo
+	err := json.Unmarshal(jsonBytes, &user)
+	if err != nil {
+		fmt.Println("Failed to convert the UserInfo")
+	}
+
+	return user
 }
