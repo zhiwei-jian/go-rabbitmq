@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	compostgres "github.com/zhiwei-jian/common-go-postgres"
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
 	user "github.com/zhiwei-jian/go-rabbitmq/user"
-	"strings"
 )
 
 /*
@@ -67,20 +68,25 @@ func main() {
 func Base64Decode(str string) string {
 	var strs []string = strings.Split(str, "\"")
 	str = strs[1]
-	reader := strings.NewReader(str)
-	decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
+	// reader := strings.NewReader(str)
+	// decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
 
-	buf := make([]byte, 1024)
+	// buf := make([]byte, 1024)
 
-	dst := ""
-	for {
-		n, err := decoder.Read(buf)
-		dst += string(buf[:n])
-		if n == 0 || err != nil {
-			break
-		}
+	// dst := ""
+	// for {
+	// 	n, err := decoder.Read(buf)
+	// 	dst += string(buf[:n])
+	// 	if n < 0 || err != nil {
+	// 		break
+	// 	}
+	// }
+
+	rawDecodedText, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		panic(err)
 	}
-	return dst
+	return string(rawDecodedText)
 }
 
 func UnmarshalJsonStr(jsonBytes []byte) user.Userinfo {

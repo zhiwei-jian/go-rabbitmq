@@ -19,6 +19,10 @@ type Userinfo struct {
 
 // Create
 func Create(c *compostgres.AppContext, user *Userinfo) {
+	if user.Name == "" {
+		log.Fatal("User name is empty")
+		return
+	}
 	// get insert id
 	lastInsertId := 0
 	// now_str := time.Now().Format("2006-01-02 15:04:05")
