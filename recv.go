@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"strings"
 
 	compostgres "github.com/zhiwei-jian/common-go-postgres"
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
+	"github.com/zhiwei-jian/go-rabbitmq/msg/order"
 	user "github.com/zhiwei-jian/go-rabbitmq/user"
+	utils "github.com/zhiwei-jian/go-rabbitmq/utils"
 )
 
 /*
@@ -21,10 +20,10 @@ Method of interface Receiver
 */
 func (t *RecvPro) Consumer(dataByte []byte) error {
 	fmt.Println(string(dataByte))
-	content := Base64Decode(string(dataByte))
+	content := utils.Base64Decode(string(dataByte))
 	fmt.Println(content)
 
-	newUser := UnmarshalJsonStr([]byte(content))
+	newUser := user.UnmarshalJsonStr2User([]byte(content))
 	user.Create(dbContext, &newUser)
 	return nil
 }
@@ -54,47 +53,23 @@ var config = &compostgres.PostgresConfig{
 var dbContext, err = compostgres.ConnectDB(config)
 
 func main() {
-	var t = &RecvPro{}
-
-	rabbitmq.Recv(rabbitmq.QueueExchange{
-		"go_test",
-		"go_test",
-		"hello_go",
+	// User
+	var userProcessor = &RecvPro{}
+	go rabbitmq.Recv(rabbitmq.QueueExchange{
+		"amqp.user.go_direct",
+		"user.info",
+		"direct_go",
 		"direct",
 		"amqp://guest:guest@10.199.196.93:30285/",
-	}, t, 3)
-}
+	}, userProcessor, 3)
 
-func Base64Decode(str string) string {
-	var strs []string = strings.Split(str, "\"")
-	str = strs[1]
-	// reader := strings.NewReader(str)
-	// decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
-
-	// buf := make([]byte, 1024)
-
-	// dst := ""
-	// for {
-	// 	n, err := decoder.Read(buf)
-	// 	dst += string(buf[:n])
-	// 	if n < 0 || err != nil {
-	// 		break
-	// 	}
-	// }
-
-	rawDecodedText, err := base64.StdEncoding.DecodeString(str)
-	if err != nil {
-		panic(err)
-	}
-	return string(rawDecodedText)
-}
-
-func UnmarshalJsonStr(jsonBytes []byte) user.Userinfo {
-	var user user.Userinfo
-	err := json.Unmarshal(jsonBytes, &user)
-	if err != nil {
-		fmt.Println("Failed to convert the UserInfo")
-	}
-
-	return user
+	// Order
+	var orderProcessor = &order.RecvOrder{}
+	rabbitmq.Recv(rabbitmq.QueueExchange{
+		"amqp.order.go_topic",
+		"*.order",
+		"topic_go",
+		"topic",
+		"amqp://guest:guest@10.199.196.93:30285/",
+	}, orderProcessor, 3)
 }

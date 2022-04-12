@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	_ "time"
@@ -85,4 +86,14 @@ func Delete(c *compostgres.AppContext, uid int) {
 		log.Fatal(err)
 	}
 	fmt.Println("delete affect rows is ", affectNum)
+}
+
+func UnmarshalJsonStr2User(jsonBytes []byte) Userinfo {
+	var user Userinfo
+	err := json.Unmarshal(jsonBytes, &user)
+	if err != nil {
+		fmt.Println("Failed to convert the UserInfo")
+	}
+
+	return user
 }
