@@ -5,6 +5,7 @@ import (
 
 	compostgres "github.com/zhiwei-jian/common-go-postgres"
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
+	"github.com/zhiwei-jian/go-rabbitmq/config"
 	"github.com/zhiwei-jian/go-rabbitmq/msg/order"
 	user "github.com/zhiwei-jian/go-rabbitmq/user"
 	utils "github.com/zhiwei-jian/go-rabbitmq/utils"
@@ -34,14 +35,6 @@ func (t *RecvPro) FailAction(dataByte []byte) error {
 	return nil
 }
 
-var config = &compostgres.PostgresConfig{
-	"10.199.196.93",
-	31656,
-	"postgres",
-	"postgres",
-	"k8s",
-}
-
 // var config = &compostgres.PostgresConfig{
 // 	"172.28.128.5",
 // 	5432,
@@ -50,7 +43,7 @@ var config = &compostgres.PostgresConfig{
 // 	"uipdb",
 // }
 
-var dbContext, err = compostgres.ConnectDB(config)
+var dbContext, err = compostgres.ConnectDB(config.PostgresConfig)
 
 func main() {
 	// User
