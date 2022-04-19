@@ -39,23 +39,25 @@ func (r *RecvOrder) Consumer(dataByte []byte) error {
 
 	defer redisContext.RedisClient.Close()
 
-	count, error := redisContext.RedisClient.Get(Ctx, string(rune(order.Uid))).Int()
-	redisContext.RedisClient.Set(Ctx, string(rune(order.Uid)), count+1, 0)
-	fmt.Println(count)
-	if error != nil {
-		fmt.Println("Failed to Get order data from redis")
-		return nil
-	}
-
-	// result, error := redisContext.RedisClient.HGet(Ctx, "orders", string(rune(order.Uid))).Int()
+	// count, error := redisContext.RedisClient.Get(Ctx, string(rune(order.Uid))).Int()
+	// redisContext.RedisClient.Set(Ctx, string(rune(order.Uid)), count+1, 0)
+	// fmt.Println(count)
 	// if error != nil {
 	// 	fmt.Println("Failed to Get order data from redis")
 	// 	return nil
 	// }
 
-	// result++
-	// fmt.Println("User " + string(order.Oid) + " to Get order data from redis")
-	// redisContext.RedisClient.HSet(Ctx, "orders", string(rune(order.Uid)), result)
+	var dbNumber int = redisContext.RedisClient.Options().DB
+	fmt.Println("DB number:" + string(dbNumber))
+
+	count, error := redisContext.RedisClient.HGet(Ctx, "orders", string(rune(order.Uid))).Int()
+	if error != nil {
+		fmt.Println("Failed to Get order data from redis")
+	}
+
+	count++
+	fmt.Println("User " + string(order.Uid) + " to Get order data from redis")
+	redisContext.RedisClient.HSet(Ctx, "orders", string(rune(order.Uid)), int64(count))
 	return nil
 }
 

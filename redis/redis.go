@@ -21,7 +21,7 @@ func ConnectRedis(config *RedisConfig) (redisContext *RedisContext, err string) 
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     config.Addr,
 		Password: config.Password,
-		// DB:       config.DB,
+		DB:       0,
 	})
 
 	ctx := context.TODO()
