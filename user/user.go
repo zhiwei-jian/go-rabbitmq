@@ -35,23 +35,45 @@ func Create(c *compostgres.AppContext, user *Userinfo) {
 }
 
 // Read
-func Read(c *compostgres.AppContext) {
+func Read(c *compostgres.AppContext) (*Userinfo, error) {
 	rows, err := c.Db.Query("SELECT * FROM userinfo")
 
 	if err != nil {
 		fmt.Println(err.Error())
-		return
+		return nil, err
 	}
 	defer rows.Close()
-
+	p := new(Userinfo)
 	for rows.Next() {
-		p := new(Userinfo)
 		err := rows.Scan(&p.Uid, &p.Name, &p.NickName, &p.Age, &p.Hobby)
 		if err != nil {
 			fmt.Println(err)
 		}
 		fmt.Println(p.Uid, p.Name, p.NickName, p.Age, p.Hobby)
 	}
+
+	return p, nil
+}
+
+// Get By Id
+func GetUserById(c *compostgres.AppContext, uid int) (*Userinfo, error) {
+	stmt, err := c.Db.Prepare("SELECT * FROM userinfo Where uid=$1")
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	row := stmt.QueryRow(uid)
+	defer stmt.Close()
+	p := new(Userinfo)
+
+	err1 := row.Scan(&p.Uid, &p.Name, &p.NickName, &p.Age, &p.Hobby)
+	if err1 != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(p.Uid, p.Name, p.NickName, p.Age, p.Hobby)
+	return p, nil
 }
 
 // UPDATE
