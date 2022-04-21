@@ -5,6 +5,8 @@ import (
 	"github.com/zhiwei-jian/go-rabbitmq/redis"
 )
 
+var dbContext compostgres.AppContext
+
 var RedisConfig = &redis.RedisConfig{
 	"10.199.196.93:30997",
 	"zisefeizhu",
@@ -17,4 +19,17 @@ var PostgresConfig = &compostgres.PostgresConfig{
 	"postgres",
 	"postgres",
 	"k8s",
+}
+
+func GetDbContext() *compostgres.AppContext {
+	if dbContext.Db != nil {
+		return &dbContext
+	}
+
+	dbContext, err := compostgres.ConnectDB(PostgresConfig)
+	if err != "" {
+		return nil
+	}
+
+	return dbContext
 }

@@ -36,7 +36,7 @@ func Create(c *compostgres.AppContext, user *Userinfo) {
 
 // Read
 func Read(c *compostgres.AppContext) (*Userinfo, error) {
-	rows, err := c.Db.Query("SELECT * FROM userinfo")
+	rows, err := c.Db.Query("SELECT * FROM users")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -57,7 +57,7 @@ func Read(c *compostgres.AppContext) (*Userinfo, error) {
 
 // Get By Id
 func GetUserById(c *compostgres.AppContext, uid int) (*Userinfo, error) {
-	stmt, err := c.Db.Prepare("SELECT * FROM userinfo Where uid=$1")
+	stmt, err := c.Db.Prepare("SELECT * FROM users Where id=$1")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -78,7 +78,7 @@ func GetUserById(c *compostgres.AppContext, uid int) (*Userinfo, error) {
 
 // UPDATE
 func Update(c *compostgres.AppContext, user Userinfo) {
-	stmt, err := c.Db.Prepare("UPDATE userinfo SET hobby = $1, nickname = $2, age = $3 WHERE uid = $4")
+	stmt, err := c.Db.Prepare("UPDATE users SET hobby = $1, nickname = $2, age = $3 WHERE uid = $4")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func Update(c *compostgres.AppContext, user Userinfo) {
 
 // DELETE
 func Delete(c *compostgres.AppContext, uid int) {
-	stmt, err := c.Db.Prepare("DELETE FROM userinfo WHERE uid = $1")
+	stmt, err := c.Db.Prepare("DELETE FROM users WHERE uid = $1")
 	if err != nil {
 		log.Fatal(err)
 	}

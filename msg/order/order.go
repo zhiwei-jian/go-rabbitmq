@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// "time"
 
 	"github.com/zhiwei-jian/go-rabbitmq/config"
 	"github.com/zhiwei-jian/go-rabbitmq/redis"
+	"github.com/zhiwei-jian/go-rabbitmq/user"
 	utils "github.com/zhiwei-jian/go-rabbitmq/utils"
 )
 
@@ -31,6 +33,15 @@ func (r *RecvOrder) Consumer(dataByte []byte) error {
 	order := UnmarshalJsonStr2Order([]byte(content))
 	fmt.Println(order)
 
+	dbContext := config.GetDbContext()
+	defer dbContext.Db.Close()
+	user, _ := user.GetUserById(dbContext, order.Uid)
+	if user == nil {
+		fmt.Println("User does not exist")
+		return nil
+	}
+	CreateOrder(dbContext, &order)
+
 	redisContext, err := redis.ConnectRedis(config.RedisConfig)
 	if err != "" {
 		fmt.Println("Failed to process order data")
@@ -47,18 +58,24 @@ func (r *RecvOrder) Consumer(dataByte []byte) error {
 	// 	return nil
 	// }
 
-	var dbNumber int = redisContext.RedisClient.Options().DB
-	fmt.Println("DB number:" + string(dbNumber))
-
-	count, error := redisContext.RedisClient.HGet(Ctx, "orders", string(rune(order.Uid))).Int()
+	signatureID := getUserSignatureID(user)
+	count, error := redisContext.RedisClient.HGet(Ctx, "orders", signatureID).Int()
 	if error != nil {
 		fmt.Println("Failed to Get order data from redis")
 	}
 
 	count++
 	fmt.Println("User " + string(order.Uid) + " to Get order data from redis")
-	redisContext.RedisClient.HSet(Ctx, "orders", string(rune(order.Uid)), int64(count))
+	redisContext.RedisClient.HSet(Ctx, "orders", signatureID, int64(count))
 	return nil
+}
+
+func getUserSignatureID(user *user.Userinfo) string {
+	if user == nil {
+		return ""
+	}
+
+	return user.Name + ":" + string(user.Uid)
 }
 
 func (t *RecvOrder) FailAction(dataByte []byte) error {

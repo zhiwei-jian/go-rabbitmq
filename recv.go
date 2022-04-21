@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	compostgres "github.com/zhiwei-jian/common-go-postgres"
 	rabbitmq "github.com/zhiwei-jian/common-go-rabbitmq"
 	"github.com/zhiwei-jian/go-rabbitmq/config"
 	"github.com/zhiwei-jian/go-rabbitmq/msg/order"
@@ -25,7 +23,7 @@ func (t *RecvPro) Consumer(dataByte []byte) error {
 	fmt.Println(content)
 
 	newUser := user.UnmarshalJsonStr2User([]byte(content))
-	user.Create(dbContext, &newUser)
+	user.Create(config.GetDbContext(), &newUser)
 	return nil
 }
 
@@ -42,8 +40,6 @@ func (t *RecvPro) FailAction(dataByte []byte) error {
 // 	"guest",
 // 	"uipdb",
 // }
-
-var dbContext, err = compostgres.ConnectDB(config.PostgresConfig)
 
 func main() {
 	// User
